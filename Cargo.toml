@@ -1,0 +1,47 @@
+[workspace]
+members  = ["crates/msgvault-core", "crates/msgvault-gpui"]
+resolver = "2"
+
+[workspace.package]
+edition      = "2024"
+license      = "MIT"
+publish      = false
+repository   = "https://github.com/penso/msgvault-gpui"
+rust-version = "1.97"
+version      = "0.1.0"
+
+[workspace.lints.rust]
+unsafe_code           = "deny"
+unused_qualifications = "deny"
+
+[workspace.lints.clippy]
+expect_used = "deny"
+unwrap_used = "deny"
+
+[workspace.dependencies]
+anyhow             = "1"
+chrono             = { default-features = false, features = ["clock", "std"], version = "0.4" }
+flate2             = "1"
+gpui-kit           = "=0.6.6"
+mail-parser        = "0.11"
+msgvault-core      = { path = "crates/msgvault-core" }
+rusqlite           = { features = ["bundled"], version = "0.40" }
+serde              = { features = ["derive"], version = "1" }
+serde_json         = "1"
+sha2               = "0.10"
+tempfile           = "3"
+thiserror          = "2"
+toml               = "1"
+tracing            = "0.1"
+tracing-subscriber = { default-features = false, features = ["ansi", "env-filter", "fmt", "std"], version = "0.3" }
+ureq               = { features = ["json"], version = "3" }
+urlencoding        = "2"
+zstd               = "0.13"
+
+[profile.dev.package."*"]
+# GPUI and SQLite are unusably slow unoptimised; keep our own crates debuggable.
+opt-level = 2
+
+[profile.release]
+codegen-units = 16
+lto           = "thin"

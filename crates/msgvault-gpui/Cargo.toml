@@ -1,0 +1,23 @@
+[package]
+edition.workspace      = true
+license.workspace      = true
+name                   = "msgvault-gpui"
+publish.workspace      = true
+repository.workspace   = true
+rust-version.workspace = true
+version.workspace      = true
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow.workspace             = true
+chrono.workspace             = true
+gpui-kit.workspace           = true
+msgvault-core.workspace      = true
+tracing.workspace            = true
+tracing-subscriber.workspace = true
+
+[features]
+# Headless Metal rendering of the real window: `--screenshot OUT.png`.
+screenshot = ["gpui-kit/test-support"]

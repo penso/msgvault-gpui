@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Deny by default; every job below declares the scopes it actually needs.
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  # Matches `nightly_toolchain` in the justfile: rustfmt.toml uses unstable options.
+  NIGHTLY: nightly-2026-06-20
+
+jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install nightly rustfmt
+        run: rustup toolchain install "$NIGHTLY" --profile minimal --component rustfmt
+      - uses: taiki-e/install-action@f176c07a0a40cbfdd08ee9aa8bf1655701d11e69 # v2.67.25
+        with:
+          tool: taplo
+      - name: Check Rust formatting
+        run: cargo "+$NIGHTLY" fmt --all -- --check
+      - name: Check TOML formatting
+        run: taplo fmt --check
+
+  build:
+    name: Build, lint and test (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            runner: macos-15
+          - name: Linux
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Linux GPUI dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            build-essential pkg-config libxkbcommon-dev libxkbcommon-x11-dev \
+            libxcb1-dev libwayland-dev libfreetype6-dev libfontconfig1-dev \
+            fonts-dejavu-core libasound2-dev
+      - name: Install pinned Rust toolchain
+        run: rustup show
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: ${{ matrix.runner }}
+      - name: Check the lockfile is current
+        run: cargo fetch --locked
+      - name: Clippy (all targets and features)
+        run: cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
+      - name: Test default features
+        run: cargo test --locked --workspace
+      - name: Test all features
+        run: cargo test --locked --workspace --all-features
+      - name: Build release binary
+        run: cargo build --locked --release -p msgvault-gpui
+      - name: Exercise the binary without opening a window
+        run: target/release/msgvault-gpui --help
+
+  deny:
+    name: cargo-deny
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
+        with:
+          command: check
+
+  zizmor:
+    name: Workflow security
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
