@@ -28,7 +28,7 @@ msgvault-core      = { path = "crates/msgvault-core" }
 rusqlite           = { features = ["bundled"], version = "0.40" }
 serde              = { features = ["derive"], version = "1" }
 serde_json         = "1"
-sha2               = "0.10"
+sha2               = "0.11"
 tempfile           = "3"
 thiserror          = "2"
 toml               = "1"
