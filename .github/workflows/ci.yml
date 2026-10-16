@@ -30,7 +30,7 @@ jobs:
           persist-credentials: false
       - name: Install nightly rustfmt
         run: rustup toolchain install "$NIGHTLY" --profile minimal --component rustfmt
-      - uses: taiki-e/install-action@f176c07a0a40cbfdd08ee9aa8bf1655701d11e69 # v2.67.25
+      - uses: taiki-e/install-action@ab6895351a88b908e96a4697860d4ffea5e57dbe # v2.87.27
         with:
           tool: taplo
       - name: Check Rust formatting
