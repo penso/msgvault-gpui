@@ -22,7 +22,7 @@ unwrap_used = "deny"
 anyhow             = "1"
 chrono             = { default-features = false, features = ["clock", "std"], version = "0.4" }
 flate2             = "1"
-gpui-kit           = "=0.6.6"
+gpui-kit           = "=0.7.1"
 mail-parser        = "0.11"
 msgvault-core      = { path = "crates/msgvault-core" }
 rusqlite           = { features = ["bundled"], version = "0.40" }
