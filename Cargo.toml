@@ -36,7 +36,7 @@ tracing            = "0.1"
 tracing-subscriber = { default-features = false, features = ["ansi", "env-filter", "fmt", "std"], version = "0.3" }
 ureq               = { features = ["json"], version = "3" }
 urlencoding        = "2"
-zstd               = "0.13"
+zstd               = "0.14"
 
 [profile.dev.package."*"]
 # GPUI and SQLite are unusably slow unoptimised; keep our own crates debuggable.
